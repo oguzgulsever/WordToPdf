@@ -6,15 +6,16 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 using System.IO;
-using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace WordToPdf
 {
-    public partial class Form1 : Form
+    public partial class Form3 : Form
     {
-        public Form1()
+        public Form3()
         {
             InitializeComponent();
         }
@@ -27,7 +28,7 @@ namespace WordToPdf
                 FileInfo fi = new FileInfo(file.FileName);
                 if (fi.Exists)
                 {
-                   label1.Text = fi.FullName;
+                    label1.Text = fi.FullName;
                     label2.Text = fi.Name;
                 }
                 else
@@ -35,11 +36,9 @@ namespace WordToPdf
                     MessageBox.Show("Dosya bulunamadı!");
                 }
             }
-
-            
-
         }
-        private void button3_Click(object sender, EventArgs e)
+
+        private void button2_Click(object sender, EventArgs e)
         {
             DialogResult result = folderBrowserDialog1.ShowDialog();
 
@@ -50,36 +49,38 @@ namespace WordToPdf
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
-            
             var appWord = new Microsoft.Office.Interop.Word.Application();
             if (appWord.Documents != null)
             {
                 //yourDoc is your word document
                 var wordDocument = appWord.Documents.Open(@label1.Text);
                 string pdfDocName = label2.Text;
-                long bt = appWord.ActiveDocument.ComputeStatistics(Microsoft.Office.Interop.Word.WdStatistic.wdStatisticPages);
-                int b = 1;
-                //int b = (int)Convert.ToInt64(textBox1.Text);
-                //int bt = (int)Convert.ToInt64(textBox2.Text);             
-                for (int i = b; b <= bt; i++) {
-                    label11.Text=i.ToString()+ "/" + bt;
-                    var dosyaYolu = Path.Combine(@label3.Text, "Sertifika_" + i + ".pdf");
-                    wordDocument.ExportAsFixedFormat(dosyaYolu,
-                   WdExportFormat.wdExportFormatPDF, OpenAfterExport: false,
-                   WdExportOptimizeFor.wdExportOptimizeForPrint, 
-                   WdExportRange.wdExportFromTo, From: i, To: i, 
-                   WdExportItem.wdExportDocumentContent, 
-                   IncludeDocProps: false, KeepIRM: false, 
-                   CreateBookmarks: WdExportCreateBookmarks.wdExportCreateNoBookmarks, DocStructureTags:true, 
-                   BitmapMissingFonts: false, UseISO19005_1:false);
-                    if (i == bt) { break; }
-                 
-                }
+                string dosya = "";
+                List<char> harf = new List<char>();
+                foreach (char c in pdfDocName.ToCharArray())
+                {
+                    harf.Add(c);
+                };
+                for (int i = 0; i <= harf.Count-6; i++)
+                {
+                    dosya = dosya + harf[i];
+                    if (i== harf.Count - 6){break;};
+                };
+                
+                var dosyaYolu = Path.Combine(@label3.Text, dosya + ".pdf");
+                    wordDocument.ExportAsFixedFormat(
+                        dosyaYolu,
+                        WdExportFormat.wdExportFormatPDF,
+                        false,
+                        WdExportOptimizeFor.wdExportOptimizeForPrint,
+                        WdExportRange.wdExportAllDocument
+                        );
+                   
                 wordDocument.Close();
                 appWord.Quit();
-                
+
             }
             this.Controls.Clear();
             this.InitializeComponent();
@@ -90,10 +91,10 @@ namespace WordToPdf
         private void button4_Click(object sender, EventArgs e)
         {
             this.Hide();
-            Form2 form = new Form2();
-            form.Show();
+            Form2 form2 = new Form2();
+            form2.Show();
         }
     }
-        
-       
 }
+
+
